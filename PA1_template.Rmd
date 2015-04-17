@@ -1,0 +1,18 @@
+---
+title: "Reproducable Research Project 1"
+author: "Ashton Chevallier"
+date: "Thursday, April 16, 2015"
+output: html_document
+---
+Download and unzip data  
+If you don't have in your wd, download it and unzip it.
+```{r}
+if(!file.exists("activity.csv")){
+    if(!file.exists("activity.zip")){
+        download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+                      ,destfile = "activity.zip")
+    }
+    unzip("activity.zip")
+}
+
+```
