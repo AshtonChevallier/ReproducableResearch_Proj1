@@ -4,8 +4,12 @@ author: "Ashton Chevallier"
 date: "Thursday, April 16, 2015"
 output: html_document
 ---
-Download and unzip data  
+
+##Loading and preprocessing the data
+1. Download and unzip data  
 If you don't have in your wd, download it and unzip it.
+
+
 ```{r}
 if(!file.exists("activity.csv")){
     if(!file.exists("activity.zip")){
@@ -15,4 +19,84 @@ if(!file.exists("activity.csv")){
     unzip("activity.zip")
 }
 
+```
+2. Read data in data frame using read.csv
+
+```{r}
+
+if(!exists("dataRaw")) {
+    dataRaw <- read.csv("activity.csv")
+}
+```
+
+3. Load packages and set NAs to blanks.
+
+```{r, echo=FALSE,results='hide'}
+
+library(ggplot2)
+library(dplyr)
+```
+```{r}
+#Transform Factor Dates to Date
+days <- as.Date(dataRaw[,2])
+steps <- dataRaw[,1]
+
+#Create subset of NA Free data
+data <- dataRaw[!is.na(dataRaw[,1]),]
+```
+
+###What is the total number of steps taken per day?
+1. Calculate the total number of steps taken per day
+```{r}
+dailySteps <- group_by(data,date) %>% summarize(steps=sum(steps))
+```
+2. Make a histogram of total steps taken each day
+```{r}
+qplot(data$date, data=data, weight=steps, geom="histogram",binwidth = 1)
+```
+
+3. Calculate and report the mean and median of the total number of steps taken per day
+```{r}
+summary(dailySteps$steps)
+```
+
+###What is the daily activity pattern
+1. Time series plot of interval vs. avgsteps across all days in 
+```{r}
+avgSteps <- group_by(data,interval) %>% summarize(avgsteps=mean(steps))
+qplot(data=avgSteps,x=interval,y=avgsteps,geom="line")
+```
+
+2. Find interval with maximum average steps
+```{r}
+intervalSteps <- group_by(data,interval) %>% summarize(totalsteps=sum(steps))
+maxInterval <- which(intervalSteps$totalsteps==max(intervalSteps$totalsteps))
+maxInterval
+```
+
+###Imputing Missing Values
+1. Calculate the total missing values in the dataset (IE. total rows with NA)
+```{r}
+count(dataRaw[is.na(dataRaw),])
+```
+2. To fill in these missing values, we will be using the average daily steps calculated earlier  
+   It's as good as method as any, and we already calculated it earlier.
+3. Now we'll use a loop to fill in the data
+```{r}
+### Probably a for loop
+```
+
+4. Plot Histogram of new filled in data, then output the summary
+```{r}
+###Use GGPLOT again
+```
+
+###Are there differences in activity patterns between weekdays and weekends?
+1. Create new variable weekday to the filled in dataset
+```{r}
+###Use Mutate and weekday()
+```
+2. Make panel plot of Weekdays vs. Weekends
+```{r}
+###Uge ggplot...need to look up the panel function though
 ```
