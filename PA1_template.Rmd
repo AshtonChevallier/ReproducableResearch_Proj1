@@ -31,7 +31,7 @@ if(!exists("dataRaw")) {
 
 3. Load packages and set NAs to blanks.
 
-```{r, echo=FALSE,results='hide'}
+```{r,results='hide'}
 
 library(ggplot2)
 library(dplyr)
@@ -60,7 +60,7 @@ qplot(data$date, data=data, weight=steps, geom="histogram",binwidth = 1)
 summary(dailySteps$steps)
 ```
 
-###What is the daily activity pattern
+###What is the daily activity pattern?
 1. Time series plot of interval vs. avgsteps across all days in 
 ```{r}
 avgSteps <- group_by(data,interval) %>% summarize(avgsteps=mean(steps))
@@ -71,7 +71,7 @@ qplot(data=avgSteps,x=interval,y=avgsteps,geom="line")
 ```{r}
 intervalSteps <- group_by(data,interval) %>% summarize(totalsteps=sum(steps))
 maxInterval <- which(intervalSteps$totalsteps==max(intervalSteps$totalsteps))
-maxInterval
+cbind(maxInterval,intervalSteps[maxInterval,])
 ```
 
 ###Imputing Missing Values
@@ -79,24 +79,44 @@ maxInterval
 ```{r}
 count(dataRaw[is.na(dataRaw),])
 ```
-2. To fill in these missing values, we will be using the average daily steps calculated earlier  
+2. To fill in these missing values, we will be using the average interval steps.
    It's as good as method as any, and we already calculated it earlier.
-3. Now we'll use a loop to fill in the data
+   
+3. Now we'll use a loop to fill in the data.
 ```{r}
-### Probably a for loop
+narows <- which(is.na(dataRaw))
+zdata <-dataRaw
+for(i in narows){
+  zdata[i,1] <- avgSteps[which(avgSteps$interval==zdata[i,3]),2]
+}
+summary(is.na(zdata))
 ```
 
 4. Plot Histogram of new filled in data, then output the summary
 ```{r}
-###Use GGPLOT again
+qplot(zdata$date, data=zdata, weight=steps, geom="histogram",binwidth = 1)
+
+summary(zdata$steps)
 ```
 
 ###Are there differences in activity patterns between weekdays and weekends?
 1. Create new variable weekday to the filled in dataset
-```{r}
-###Use Mutate and weekday()
+```{r,results ='hide'}
+#Helper Function to make weekday or weekend
+weekend <- function(x) {a
+  if(x=='Sunday' | x=='Saturday') {y <- 'Weekend'}
+  else {y <- 'Weekday'}
+  y
+  }
+
+#Mutate to make new variable
+zdata <- mutate(zdata, Weekday = weekdays(as.Date(date)))
+zdata$Weekday <- sapply(zdata$Weekday,FUN=weekend)
+
 ```
 2. Make panel plot of Weekdays vs. Weekends
 ```{r}
-###Uge ggplot...need to look up the panel function though
+avgWeekdaySteps <- group_by(zdata,Weekday,interval) %>% summarize(avgsteps=mean(steps))
+qplot(data=avgWeekdaySteps,x=interval,y=avgsteps,geom="line", facets = Weekday ~.)
 ```
+
